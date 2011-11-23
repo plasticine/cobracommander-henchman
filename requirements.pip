@@ -1,6 +1,8 @@
-redis
-gunicorn
-werkzeug
-gevent
-gevent-websocket
-gevent-socketio
+Werkzeug==0.8.1
+gevent==0.13.6
+gevent-socketio==0.2.1
+gevent-websocket==0.2.3
+greenlet==0.3.1
+gunicorn==0.13.4
+psycopg2==2.4.1
+redis==2.4.10
