@@ -1,62 +1,48 @@
 import gevent
 from werkzeug.wrappers import Response
+from werkzeug.exceptions import NotFound
 
-class SocketIOChannelProxy(object):
-    """"""
+from lib.socketio.channel import SocketIOChannelProxy
+from lib.socketio import events
 
-    def __init__(self, socket):
-        """
-        Store the original socket protocol object.
-        """
-        self.socket = socket
-        self.channels = []
-
-    def subscribe(self, channel):
-        """
-        Add the channel to this socket's channels, and to the list of
-        subscribed session IDs for the channel. Return False if
-        already subscribed, otherwise True.
-        """
-        if channel in self.channels:
-            return False
-        CHANNELS[channel].append(self.socket.session.session_id)
-        self.channels.append(channel)
-        return True
-
-    def unsubscribe(self, channel):
-        """
-        Remove the channel from this socket's channels, and from the
-        list of subscribed session IDs for the channel. Return False
-        if not subscribed, otherwise True.
-        """
-        try:
-            CHANNELS[channel].remove(self.socket.session.session_id)
-            self.channels.remove(channel)
-        except ValueError:
-            return False
-        return True
-
-    def broadcast(self, channel, message):
-        """
-        Send the given message to all subscribers for the channel
-        given. If no channel is given, send to the subscribers for
-        all the channels that this socket is subscribed to.
-        """
-        for subscriber in CHANNELS[channel]:
-            if subscriber != self.socket.session.session_id:
-                self._write(message, self.socket.handler.server.sessions[subscriber])
-
-    def __getattr__(self, name):
-        """
-        Proxy missing attributes to the socket.
-        """
-        return getattr(self.socket, name)
-
+CLIENTS = {}
 
 class SocketIOHandler(object):
-    """"""
+    """
 
-    def __call__(self, request, method):
-        socketio = SocketIOChannelProxy(request.environ["socketio"])
+    """
 
-        return Response("%s" % request.environ)
+    def __call__(self, server, request, method):
+        """"""
+        # wrap up the socket.io object in SocketIOChannelProxy to add channels
+        socket = SocketIOChannelProxy(request.environ["socketio"])
+
+        # check that this is actually a websocket request. The session will be
+        # `None` if not
+        if socket.session:
+            # store the request and socket objects in the client dict
+            CLIENTS[socket.session.session_id] = (request, socket)
+
+            try:
+                while True:
+                    # wait for messages
+                    message = socket.recv()
+                    if len(message):
+                        if message[0] == '__subscribe__':
+                            # subscribe the socket to the channel
+                            socket.subscribe(message[1])
+                            events.on_subscribe.send(request, socket, channel=message[1])
+                        elif message[0] == '__unsubscribe__':
+                            # unsubscribe the socket from channel
+                            socket.unsubscribe(message[1])
+                            events.on_unsubscribe.send(request, socket, channel=message[1])
+                        else:
+                            # handle regular messages
+                            events.on_message.send(request, socket, message)
+                    elif not socket.connected():
+                        events.on_disconnect.send(request, socket)
+                        break
+                return Response('')
+            except Exception, e:
+                raise e
+        raise NotFound()
