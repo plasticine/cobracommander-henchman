@@ -1,7 +1,30 @@
 <html>
   <head>
     <title>Henchman</title>
+    <script type="text/javascript" src="/static/javascripts/jquery.1.7.1.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+      (function() {
+        var prototype = io.Socket.prototype;
+        io.Socket = function(host, options) {
+            options = options || {};
+            return prototype.constructor.call(this, host, options);
+        };
+        // We need to reassign all members for the above to work.
+        for (var name in prototype) {
+            io.Socket.prototype[name] = prototype[name];
+        }
+        // Set up the subscription methods.
+        io.Socket.prototype.subscribe = function(channel) {
+            this.send(['__subscribe__', channel]);
+            return this;
+        };
+        io.Socket.prototype.unsubscribe = function(channel) {
+            this.send(['__unsubscribe__', channel]);
+            return this;
+        };
+      })();
+    </script>
   </head>
   <body>
     <pre>
@@ -11,6 +34,24 @@
     |___|___||_____||__|__||____||__|__||__|__|__||___._||__|__|
     </pre>
     <hr>
-
+    <script type="text/javascript">
+      $(function(){
+        var socket = new io.Socket('localhost', {
+          'port':7000
+        });
+        socket.connect();
+        socket.on('connect', function() {
+          console.log('socket:connected');
+          socket.send('test');
+        });
+        socket.on('disconnect', function() {
+          console.log('socket:disconnect')
+        });
+        socket.on('message', function(data) {
+          console.log('socket:message', data)
+        });
+        console.log(socket);
+      });
+    </script>
   </body>
 </html>
