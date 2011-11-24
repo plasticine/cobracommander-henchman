@@ -27,11 +27,11 @@ application = server.application
 if __name__ == '__main__':
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from henchman import VERSION
+    from henchman import __version__
     from socketio import SocketIOServer
     from optparse import OptionParser
 
-    parser = OptionParser(version="%s" % (VERSION))
+    parser = OptionParser(version="%s" % (__version__))
     parser.add_option("-a", "--address", dest="address", help="hostname", default="localhost")
     parser.add_option("-p", "--port", dest="port", help="port", type="int", default=7000)
     parser.add_option("-d", "--debug", action="store_true", dest="debug", help="enable debugging", default=False)
@@ -59,3 +59,5 @@ Henchman is on patrol at http://%s:%s""" % HOST
             policy_server=False).serve_forever()
     except KeyboardInterrupt, e:
         print "\nShutting down..."
+        socketio.SocketIOHandler.cleanup()
+        print "Bye!"

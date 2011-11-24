@@ -39,17 +39,17 @@
         var socket = new io.Socket('localhost', {
           'port':7000
         });
-        socket.connect();
         socket.on('connect', function() {
           console.log('socket:connected');
-          socket.send('test');
+          socket.subscribe('test');
         });
         socket.on('disconnect', function() {
-          console.log('socket:disconnect')
+          console.log('socket:disconnect');
         });
         socket.on('message', function(data) {
-          console.log('socket:message', data)
+          console.log('socket:message', data);
         });
+        socket.connect();
         console.log(socket);
       });
     </script>
