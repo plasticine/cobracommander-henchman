@@ -7,7 +7,7 @@ from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
 
 from lib import wsgi, logger
-from views import static, socketio
+from views import static, socketio, minion
 
 class Server(wsgi.WSGIWebsocketBase):
     """
@@ -17,6 +17,7 @@ class Server(wsgi.WSGIWebsocketBase):
         self.logger = logger.get_logger(__name__)
         self.urls = Map([
             Rule('/', endpoint=static.root),
+            Rule('/minion', methods=['post'], endpoint=minion.spawn),
             Rule('/socket.io/<method>', endpoint=socketio.SocketIOHandler())
         ])
         super(Server, self).__init__()

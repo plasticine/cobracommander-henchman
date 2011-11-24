@@ -7,3 +7,4 @@ gunicorn==0.13.4
 psycopg2==2.4.1
 redis==2.4.10
 Jinja2==2.6
+nose
