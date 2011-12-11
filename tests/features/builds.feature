@@ -1,12 +1,12 @@
 Feature: Managing Builds
   In order for builds to be managed we need to provide an interface
-  As another web service
+  As Programmer
   I want to be able to manage Builds via POST requests to Henchman
 
   Scenario: Queue a new Build
-    Given Henchman is listening for new builds
+    Given we need to run a new build
     When Henchman recieves a POST request to create a build
-    Then Henchman creates a new build and appends it to the build queue
+    Then Henchman creates a new build and appends it to the build-queue
 
   Scenario: Stop a Build
     Given a Build is currently being run by Henchamn
