@@ -7,7 +7,7 @@ from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
 
 from lib import wsgi, logger
-from views import static, socketio, minion
+from views import static, socketio, builds
 
 class Server(wsgi.WSGIWebsocketBase):
     """
@@ -17,19 +17,26 @@ class Server(wsgi.WSGIWebsocketBase):
         self.logger = logger.get_logger(__name__)
         self.urls = Map([
             Rule('/', endpoint=static.root),
-            Rule('/minion', methods=['post'], endpoint=minion.spawn),
+            Rule('/builds/new', methods=['post'], endpoint=builds.new),
             Rule('/socket.io/<method>', endpoint=socketio.SocketIOHandler())
         ])
         super(Server, self).__init__()
 
 server = Server()
-application = server.application
+
+def run_server(app, address, port):
+    from socketio import SocketIOServer
+    app = SharedDataMiddleware(app, {
+        '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), 'static/javascripts/socket.io.js'),
+        '/static': os.path.join(os.path.dirname(__file__), 'static')
+    })
+    return SocketIOServer((address, port), app, resource="socket.io",
+        policy_server=False)
 
 if __name__ == '__main__':
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from henchman import __version__
-    from socketio import SocketIOServer
     from optparse import OptionParser
 
     parser = OptionParser(version="%s" % (__version__))
@@ -39,26 +46,17 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     try:
-        HOST = (options.address, options.port)
         print """ _______                      __
 |   |   |.-----..-----..----.|  |--..--------..---.-..-----.
 |       ||  -__||     ||  __||     ||        ||  _  ||     |
 |___|___||_____||__|__||____||__|__||__|__|__||___._||__|__|
 
-Henchman is on patrol at http://%s:%s""" % HOST
-        application = SharedDataMiddleware(application, {
-            '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), 'static/javascripts/socket.io.js'),
-            '/static': os.path.join(os.path.dirname(__file__), 'static')
-        })
-        if options.debug:
-            from werkzeug.debug import DebuggedApplication
-            application = DebuggedApplication(application)
-            print "Running with debugger enabled."
+Henchman is on patrol at http://%s:%s""" % (options.address, options.port)
+        server = run_server(server.application, options.address, options.port).serve_forever()
         print '-'*61
         print
-        SocketIOServer(HOST, application, resource="socket.io",
-            policy_server=False).serve_forever()
     except KeyboardInterrupt, e:
         print "\nShutting down..."
         socketio.SocketIOHandler.cleanup()
+        server.kill()
         print "Bye!"
