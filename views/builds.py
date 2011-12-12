@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 from werkzeug.wrappers import Response
 
 def new(server, request):
@@ -6,4 +8,6 @@ def new(server, request):
     """
     if request.method == 'POST':
         build_id = request.form['id']
-        return Response('New build with id:%s added to queue.' % (build_id))
+        logger.info('New build with id:%s added to BuildQueue', build_id)
+        server.queue.append(id=build_id)
+        return Response('OK')
