@@ -6,7 +6,7 @@ from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
 
-from lib import wsgi, logger
+from lib import wsgi, logger, buildqueue
 from views import static, socketio, builds
 
 class Server(wsgi.WSGIWebsocketBase):
@@ -15,6 +15,7 @@ class Server(wsgi.WSGIWebsocketBase):
     """
     def __init__(self):
         self.logger = logger.get_logger(__name__)
+        self.queue = buildqueue.BuildQueue()
         self.urls = Map([
             Rule('/', endpoint=static.root),
             Rule('/builds/new', methods=['post'], endpoint=builds.new),
