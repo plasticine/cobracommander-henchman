@@ -6,8 +6,8 @@ from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
 
-from lib import wsgi, logger, buildqueue
-from views import static, socketio, builds
+from henchman.lib import wsgi, logger, buildqueue
+from henchman.views import static, socketio, builds
 
 class Server(wsgi.WSGIWebsocketBase):
     """
@@ -28,8 +28,8 @@ server = Server()
 def run_server(app, address, port):
     from socketio import SocketIOServer
     app = SharedDataMiddleware(app, {
-        '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), 'static/javascripts/socket.io.js'),
-        '/static': os.path.join(os.path.dirname(__file__), 'static')
+        '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), 'henchman/static/javascripts/socket.io.js'),
+        '/static': os.path.join(os.path.dirname(__file__), 'henchman/static')
     })
     return SocketIOServer((address, port), app, resource="socket.io",
         policy_server=False)
