@@ -17,6 +17,7 @@ class BuildQueue(object):
 
   def next(self):
     if (self.current_item == len(self._queue)):
+        self.current_item = 0
         raise StopIteration
     else:
         data = self._queue[self.current_item]
