@@ -1,5 +1,12 @@
-import re, urlparse, os
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+
+import re, urlparse
 from collections import defaultdict
+
+from django.core.management import setup_environ
+from cobracommander import settings as cobracommander_settings
+setup_environ(cobracommander_settings)
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
