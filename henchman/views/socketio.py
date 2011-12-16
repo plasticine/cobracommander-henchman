@@ -1,6 +1,8 @@
 import sys
+
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import NotFound
+
 from django_socketio import events
 from django_socketio.channels import SocketIOChannelProxy
 

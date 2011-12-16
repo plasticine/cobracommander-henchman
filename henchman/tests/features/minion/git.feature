@@ -3,9 +3,15 @@ Feature: Cloning remote projects via Git
   As a Programmer
   I want to be able to have my project code cloned quickly and efficiently so I can start testing faster
 
-  Scenario: New project
-    Given a project called "WidgetsApp" does not exist
-    When I create a new project called "WidgetsApp"
-    And build the default build-target
-    Then there should be a cached version of the codebase in the Vault
-    And there should be a copy of the codebase for the default build-target in the Vault
+  Scenario: Clone
+    Given I have a uuid for a Project Target of "de76c3e" which does not exist in the Vault
+    When I tell Git to update to "master"
+    Then I should see the repo checked out in a directory called "de76c3e"
+    And the current HEAD should be "master"
+
+  Scenario: Reset Hard
+    Given I have a uuid for a Project Target of "f2c844a" which does exist in the Vault
+    When I tell Git to update to "foobar"
+    Then I should see the repo checked out in a directory called "f2c844a"
+    And the current HEAD should be "foobar"
+
