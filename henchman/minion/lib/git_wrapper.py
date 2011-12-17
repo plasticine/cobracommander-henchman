@@ -1,7 +1,7 @@
+from os import path
 from git import *
-from django.conf import settings
 
-class Git(object):
+class GitWrapper(object):
   """
   Handle cloning a project remote repo.
 
@@ -13,21 +13,27 @@ class Git(object):
   can just update & copy then just cached repo and then `reset --hard` onto
   the required target within the copy, saving us from a full git clone each
   time.) It also means that we can properly sandbox the codebase for each
-  build-target from the others — allowing for the possibility of having two
-  build-targets for the same project executing in parallel.
+  build-target from the others.
   """
 
-  def __init__(self, url, uuid):
+  def __init__(self, url, repo_path, uuid, refspec):
     self.url = url
+    self.repo_path = repo_path
     self.uuid = uuid
-    self.path = os.path.join(settings.BUILD_ROOT, self.uuid)
+    self.refspec = refspec
+    self._update()
 
-  def clone(self):
-    pass
+  def _clone(self):
+    Git().clone(self.url, self.repo_path)
+    self.repo = Repo(self.repo_path)
+    self.repo.git.reset(self.refspec, hard=True)
 
-  def rebase(self):
-    git = repo.git
-    git.reset('head', hard=True)
+  def _rebase(self):
+    self.repo = Repo(self.repo_path)
+    self.repo.git.reset(self.refspec, hard=True)
 
-  def update(self, refspec):
-    pass
+  def _update(self):
+    if path.exists(self.repo_path):
+      self._rebase()
+    else:
+      self._clone()
