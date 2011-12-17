@@ -45,7 +45,6 @@ class Minion(object):
     """
     self._status = ACTIVE
     g = gevent.Greenlet(self._run)
-    print g
     g.start()
     # self.snakefile = Snakefile(self.repo_path)
     # for step in self.snakefile['build']:
