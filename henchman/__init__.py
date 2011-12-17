@@ -6,7 +6,12 @@ def setup_environment():
   running `django.core.management.setup_environ`
   """
   import sys, os
-  sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
   from django.core.management import setup_environ
-  from cobracommander import settings as cobracommander_settings
-  setup_environ(cobracommander_settings)
+
+  if 'DJANGO_SETTINGS_MODULE' in os.environ:
+    sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
+    name = 'cobracommander.%s' % os.environ['DJANGO_SETTINGS_MODULE']
+    __import__(name)
+    setup_environ(sys.modules[name])
+  else:
+    raise
