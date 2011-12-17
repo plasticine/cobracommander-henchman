@@ -46,11 +46,6 @@ class Minion(object):
     self._status = ACTIVE
     g = gevent.Greenlet(self._run)
     g.start()
-    # self.snakefile = Snakefile(self.repo_path)
-    # for step in self.snakefile['build']:
-    #   step.execute()
-    #   while step.process.poll() is None:
-    #     print step.process.stdout.readline()
 
   def _run(self):
     gitwrapper = GitWrapper(
@@ -59,6 +54,11 @@ class Minion(object):
       self._build.uuid,
       self._build.target_set.all()[0].refspec
     )
+    self.snakefile = Snakefile(self.repo_path)
+    for step in self.snakefile['build']:
+      step.execute()
+      while step.process.poll() is None:
+        print step.process.stdout.readline()
 
   def stop(self):
     self._status = STOPPED
