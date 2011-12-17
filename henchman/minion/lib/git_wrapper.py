@@ -1,3 +1,4 @@
+from gevent import monkey; monkey.patch_all()
 from os import path
 from git import *
 
@@ -20,7 +21,7 @@ class GitWrapper(object):
     self.url = url
     self.repo_path = repo_path
     self.uuid = uuid
-    self.refspec = refspec
+    self.refspec = "origin/%s" % refspec
     self._update()
 
   def _clone(self):
@@ -28,12 +29,13 @@ class GitWrapper(object):
     self.repo = Repo(self.repo_path)
     self.repo.git.reset(self.refspec, hard=True)
 
-  def _rebase(self):
+  def _reset(self):
     self.repo = Repo(self.repo_path)
     self.repo.git.reset(self.refspec, hard=True)
 
   def _update(self):
     if path.exists(self.repo_path):
-      self._rebase()
+      self._reset()
     else:
       self._clone()
+    return

@@ -1,3 +1,4 @@
+import gevent
 import os
 
 from django.conf import settings
@@ -43,18 +44,22 @@ class Minion(object):
     - Save necessary things to DB.
     """
     self._status = ACTIVE
-    self.gitwrapper = GitWrapper(
+    g = gevent.Greenlet(self._run)
+    print g
+    g.start()
+    # self.snakefile = Snakefile(self.repo_path)
+    # for step in self.snakefile['build']:
+    #   step.execute()
+    #   while step.process.poll() is None:
+    #     print step.process.stdout.readline()
+
+  def _run(self):
+    gitwrapper = GitWrapper(
       self._build.project.url,
       self.repo_path,
       self._build.uuid,
       self._build.target_set.all()[0].refspec
     )
-    self.snakefile = Snakefile(self.repo_path)
-    for step in self.snakefile['build']:
-      step.execute()
-      while step.process.poll() is None:
-        print step.process.stdout.readline()
-
 
   def stop(self):
     self._status = STOPPED
