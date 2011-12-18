@@ -1,4 +1,7 @@
-{
+#!/usr/bin/env python
+# encoding: utf-8
+
+config = {
   'environment':{
     'DJANGO_SETTINGS_MODULE':'settings.test'
   },
@@ -11,3 +14,6 @@
     'after_failing':['say "Fail"']
   }
 }
+
+import json
+print json.dumps(config)

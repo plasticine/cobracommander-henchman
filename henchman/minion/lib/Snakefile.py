@@ -1,5 +1,5 @@
 from os import path, chmod
-from stat import S_IRWXO
+from stat import S_IEXEC
 import subprocess
 import json
 
@@ -29,11 +29,13 @@ class Snakefile(object):
       self.get()
 
    def get(self):
-      self.contents = self._get_contents()
-      self.json = self._parse_json()
+      self.contents = self._run_and_return_output()
+      self._parse_json()
 
-   def _get_contents(self):
-      return file(self.snakefile_path).read()
+   def _run_and_return_output(self):
+      print chmod(self.snakefile_path, 0777)
+      return subprocess.Popen(self.snakefile_path, cwd=settings.BUILD_ROOT,
+            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
    def _parse_json(self):
       print self.contents
