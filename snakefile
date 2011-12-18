@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import simplejson as json
+import json
 
 config = {
   'environment':{
