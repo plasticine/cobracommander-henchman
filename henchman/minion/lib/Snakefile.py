@@ -1,5 +1,9 @@
-from os import path
+from os import path, chmod
+from stat import S_IRWXO
+import subprocess
 import json
+
+from django.conf import settings
 
 from .step import Step
 
@@ -22,9 +26,15 @@ class Snakefile(object):
    def __init__(self, repo_path):
       self.repo_path = repo_path
       self.snakefile_path = path.join(self.repo_path, 'snakefile')
-      self._parse()
+      self.get()
 
-   def _parse(self):
-      self.snakefile = open(self.snakefile_path, 'r')
-      print json.loads(self.snakefile.read())
-      self.snakefile.close()
+   def get(self):
+      self.contents = self._get_contents()
+      self.json = self._parse_json()
+
+   def _get_contents(self):
+      return file(self.snakefile_path).read()
+
+   def _parse_json(self):
+      print self.contents
+      print json.loads(self.contents)
