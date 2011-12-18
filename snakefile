@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+import json
 
 config = {
   'environment':{
@@ -15,5 +16,4 @@ config = {
   }
 }
 
-import json
 print json.dumps(config)

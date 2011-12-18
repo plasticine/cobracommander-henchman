@@ -33,10 +33,17 @@ class Snakefile(object):
       self._parse_json()
 
    def _run_and_return_output(self):
-      print chmod(self.snakefile_path, 0777)
-      return subprocess.Popen(self.snakefile_path, cwd=settings.BUILD_ROOT,
-            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+      p = subprocess.Popen(self.snakefile_path, shell=True,
+               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      stdout, stderr = p.communicate()
+
+      print
+      print 'stdout', stdout
+      print
+      print 'stderr', stderr
+      print
+
+      return stdout
 
    def _parse_json(self):
-      print self.contents
       print json.loads(self.contents)
