@@ -1,4 +1,6 @@
 from os import path
+import json
+
 from .step import Step
 
 class Snakefile(object):
@@ -19,8 +21,10 @@ class Snakefile(object):
 
    def __init__(self, repo_path):
       self.repo_path = repo_path
-      self.snakefile = path.join(self.repo_path)
+      self.snakefile_path = path.join(self.repo_path, 'snakefile')
       self._parse()
 
    def _parse(self):
-      pass
+      self.snakefile = open(self.snakefile_path, 'r')
+      print json.loads(self.snakefile.read())
+      self.snakefile.close()
