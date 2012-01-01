@@ -16,6 +16,24 @@
 
     <ul>
       <li>
+          <strong>clients:</strong> {{ clients }}
+      </li>
+      <li>
+          <strong>channels:</strong>
+          <ul>
+            {% for channel in channels %}
+              <li>
+                <strong>{{ channel }}</strong>
+                <ul>
+                  {% for client in channels[channel] %}
+                    <li>{{ client }}</li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+      </li>
+      <li>
         <strong>Queue Length:</strong> {{ queue|length }}
         <ul>
           {% for minion in queue %}
@@ -24,7 +42,7 @@
         </ul>
       </li>
     </ul>
-
+    <!--
     <script type="text/javascript">
       $(function(){
         var socket = new io.Socket('localhost', {
@@ -44,5 +62,6 @@
         console.log(socket);
       });
     </script>
+    -->
   </body>
 </html>
