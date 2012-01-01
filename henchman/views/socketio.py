@@ -5,10 +5,10 @@ from werkzeug.exceptions import NotFound
 
 from django_socketio import events
 from django_socketio.channels import SocketIOChannelProxy
+from django_socketio.views import CLIENTS
 
 from ..lib import logger
 
-CLIENTS = {}
 class SocketIOHandler(object):
     """
 
