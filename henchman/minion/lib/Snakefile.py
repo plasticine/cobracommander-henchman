@@ -1,11 +1,14 @@
 from os import path, chmod
-from stat import S_IEXEC
 import subprocess
 import json
 
 from django.conf import settings
 
 from .step import Step
+
+class InvalidSnakefile(Exception):
+   pass
+
 
 class Snakefile(object):
    """
@@ -23,27 +26,40 @@ class Snakefile(object):
       - after_failing: []
    """
 
-   def __init__(self, repo_path):
-      self.repo_path = repo_path
-      self.snakefile_path = path.join(self.repo_path, 'snakefile')
-      self.get()
+   def __init__(self, local_path):
+      self.snakefile = None
+      self.local_path = local_path
+      self.snakefile_path = path.join(self.local_path, 'snakefile')
 
-   def get(self):
-      self.contents = self._run_and_return_output()
-      self._parse_json()
+   def __getitem__(self, key):
+      self.read()
+      return self.snakefile[key]
+
+   def __len__(self):
+      self.read()
+      return len(self.snakefile)
+
+   def read(self):
+      if self.snakefile == None:
+         self._contents = self._run_and_return_output()
+         self._parse()
+      return True
 
    def _run_and_return_output(self):
+      chmod(self.snakefile_path, 0777)
       p = subprocess.Popen(self.snakefile_path, shell=True,
                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      stdout, stderr = p.communicate()
+      snakefile, err = p.communicate()
+      if err == '':
+         return snakefile
+      raise InvalidSnakefile("Invalid Snakefile: %s", err)
 
-      print
-      print 'stdout', stdout
-      print
-      print 'stderr', stderr
-      print
-
-      return stdout
-
-   def _parse_json(self):
-      print json.loads(self.contents)
+   def _parse(self):
+      self.snakefile = json.loads(self._contents)
+      try:
+         assert 'build' in self.snakefile, "Your Snakefile is missing a 'build' attribute."
+         assert len(self.snakefile['build']) > 0, "You have not defined any build steps in your snakefile."
+      except AssertionError, e:
+         raise InvalidSnakefile("Invalid Snakefile: %s", e)
+      self.snakefile['build'] = map(lambda command: Step(local_path=self.local_path, command=command),
+                           self.snakefile['build'])

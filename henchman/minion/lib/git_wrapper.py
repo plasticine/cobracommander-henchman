@@ -19,11 +19,11 @@ class GitWrapper(object):
   build-target from the others.
   """
 
-  def __init__(self, url, repo_path, uuid, refspec):
-    self.url = url
-    self.repo_path = repo_path
-    self.uuid = uuid
-    self.refspec = "origin/%s" % refspec
+  def __init__(self, build, local_path):
+    self.build = build
+    self.local_path = local_path
+    self.remote_url = self.build.project.url
+    self.refspec = "origin/%s" % self.build.target.refspec
     self._update()
 
   def _git(self, command):
@@ -36,7 +36,7 @@ class GitWrapper(object):
     git clone repo path
     git reset --hard refspec
     """
-    self._git('clone %s %s' % (self.url, self.repo_path))
+    self._git('clone %s %s' % (self.remote_url, self.local_path))
     self._git('reset --hard %s' % (self.refspec))
 
   def _reset(self):
@@ -46,7 +46,7 @@ class GitWrapper(object):
     self._git('reset --hard %s' % (self.refspec))
 
   def _update(self):
-    if path.exists(self.repo_path):
+    if path.exists(self.local_path):
       self._reset()
     else:
       self._clone()
