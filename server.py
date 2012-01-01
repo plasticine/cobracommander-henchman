@@ -1,3 +1,5 @@
+from gevent import monkey; monkey.patch_all()
+
 from optparse import OptionParser
 
 from henchman import __version__, setup_environment
