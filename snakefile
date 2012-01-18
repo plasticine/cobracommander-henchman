@@ -13,6 +13,7 @@ config = {
     'before_build':['git clean -dfx'],
     'after_passing':['say "Success"'],
     'after_failing':['say "Fail"']
+    # 'after_build':[]
   }
 }
 

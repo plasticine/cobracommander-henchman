@@ -24,12 +24,14 @@ class GitWrapper(object):
     self.local_path = local_path
     self.remote_url = self.build.project.url
     self.refspec = "origin/%s" % self.build.target.refspec
+    self.stdout = subprocess.PIPE
+    self.stderr = subprocess.PIPE
     self._update()
 
-  def _git(self, command):
+  def _git(self, command, cwd=settings.BUILD_ROOT):
     command = "`which git` %s" % command
-    return subprocess.Popen(command, cwd=settings.BUILD_ROOT, shell=True,
-              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    return subprocess.Popen(command, cwd=cwd, shell=True,
+              stdout=self.stdout, stderr=self.stderr).communicate()
 
   def _clone(self):
     """
@@ -37,17 +39,17 @@ class GitWrapper(object):
     git reset --hard refspec
     """
     self._git('clone %s %s' % (self.remote_url, self.local_path))
-    self._git('reset --hard %s' % (self.refspec))
 
   def _reset(self):
     """
     git reset --hard refspec
     """
-    self._git('reset --hard %s' % (self.refspec))
+    self._git('reset --hard %s' % (self.refspec), cwd=self.local_path)
 
   def _update(self):
     if path.exists(self.local_path):
       self._reset()
     else:
       self._clone()
+      self._reset()
     return

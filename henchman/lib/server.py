@@ -1,11 +1,11 @@
 import os, re, urlparse
 from collections import defaultdict
 
-from socketio import SocketIOServer
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
+from socketio import SocketIOServer
 
 import wsgi, logger, buildqueue
 from ..views import static, socketio, builds
@@ -24,10 +24,13 @@ class Server(wsgi.WSGIWebsocketBase):
         ])
         super(Server, self).__init__()
 
-def run(app, address, port):
-    app = SharedDataMiddleware(app, {
+def _wrap_middleware(app):
+    return SharedDataMiddleware(app, {
         '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), '../static/javascripts/socket.io.js'),
         '/static': os.path.join(os.path.dirname(__file__), '../static')
     })
+
+def run(app, address, port=9000):
+    app = _wrap_middleware(app)
     return SocketIOServer((address, port), app, resource="socket.io",
         policy_server=False)

@@ -1,5 +1,5 @@
-import gevent
 from gevent.monkey import patch_all; patch_all()
+import gevent
 from multiprocessing import Process
 
 from henchman import setup_environment

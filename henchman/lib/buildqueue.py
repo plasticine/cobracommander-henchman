@@ -1,6 +1,5 @@
 import gevent
 import json
-import jsonpickle
 from django_socketio import events, broadcast_channel
 from django.utils import simplejson as json
 from .json_encoder import ModelJSONEncoder
@@ -51,7 +50,8 @@ class BuildQueue(object):
     Poll `_queue` to see if we need to start a new Minion.
     """
     while True:
-      if len(self._queue) and len(filter(lambda x: x.is_active(), self._queue)) < 1:
+      # filter queue for only items that are waiting to execute.
+      if len(self._queue) and len(filter(lambda x: not x.is_waiting, self._queue)) < 1:
         self._queue[0].start()
       gevent.sleep(0.5)
 

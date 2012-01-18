@@ -51,6 +51,7 @@ class Snakefile(object):
                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       snakefile, err = p.communicate()
       if err == '':
+         print snakefile
          return snakefile
       raise InvalidSnakefile("Invalid Snakefile: %s", err)
 

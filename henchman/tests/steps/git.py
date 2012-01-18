@@ -1,4 +1,4 @@
-from henchman.minion.lib import Git
+from henchman.minion.lib import git_wrapper
 
 @given(u'I have a uuid for a Project Target of "{uuid}" which does not exist in the Vault')
 def step(context, uuid):

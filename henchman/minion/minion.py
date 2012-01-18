@@ -32,8 +32,9 @@ class Minion(object):
     return "<%s build_id='%s' build_uuid='%s' status='%s'>" % ("Minion",
       self.build.id, self.build.uuid, self.status)
 
-  def is_active(self):
-    return self._status == ACTIVE
+  @property
+  def is_waiting(self):
+    return self._status == WAITING
 
   @property
   def status(self):
@@ -55,23 +56,29 @@ class Minion(object):
     self.greenlet.start()
 
   def _run(self):
+    self._broadcast('git')
     self.git_wrapper = GitWrapper(build=self.build, local_path=self.local_path)
+
+    self._broadcast('snakefile')
     self.snakefile = Snakefile(local_path=self.local_path)
 
+    print self.snakefile.snakefile
+
+    self._broadcast('build')
     for step in self.snakefile['build']:
       step.execute()
       while step.process.poll() is None:
         self._broadcast(step.process.stdout.readline())
 
+    self._broadcast('cleanup')
     self.cleanup()
-
 
   def stop(self):
     self.greenlet.kill()
     self._status = STOPPED
 
   def cleanup(self):
-    self._status = INACTIVE
+    self._status = STOPPED
     self.greenlet.join()
 
   def _broadcast(self, data):
