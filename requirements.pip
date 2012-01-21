@@ -1,5 +1,6 @@
 Werkzeug==0.8.1
 gevent==0.13.6
+gevent-psycopg2==0.0.2
 gevent-socketio==0.2.1
 gevent-websocket==0.2.3
 greenlet==0.3.1

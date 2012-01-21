@@ -1,4 +1,5 @@
 from gevent import monkey; monkey.patch_all()
+import gevent_psycopg2; gevent_psycopg2.monkey_patch()
 
 from optparse import OptionParser
 
