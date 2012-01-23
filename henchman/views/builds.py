@@ -11,3 +11,4 @@ def new(server, request):
         logger.info('New build with id:%s added to BuildQueue', build_id)
         server.queue.append(id=build_id)
         return Response('OK')
+    return Response(status=400)
