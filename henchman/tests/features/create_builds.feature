@@ -1,5 +1,8 @@
 Feature: new builds can be added to the build queue
 
+  Background: some requirement of this test
+    Given that a project called "foobar" exists
+
   Scenario: recieve a POST request with a valid build id
     Given that we have an empty build queue
       And a build exists with id "1234"
