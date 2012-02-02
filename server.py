@@ -2,6 +2,7 @@ from gevent import monkey; monkey.patch_all()
 import gevent_psycopg2; gevent_psycopg2.monkey_patch()
 
 from optparse import OptionParser
+from termcolor import colored
 
 from henchman import __version__, setup_environment
 setup_environment()
@@ -16,17 +17,17 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     try:
-        print """ _______                      __
+        print colored(""" _______                      __
 |   |   |.-----..-----..----.|  |--..--------..---.-..-----.
 |       ||  -__||     ||  __||     ||        ||  _  ||     |
 |___|___||_____||__|__||____||__|__||__|__|__||___._||__|__|
 
-Henchman is on patrol at http://%s:%s""" % (options.address, options.port)
+Henchman is on patrol at http://%s:%s""" % (options.address, options.port), 'blue')
         henchman = Henchman().run(options.address, options.port)
-        print '-'*61
+        print colored('-'*60, 'blue')
         print
         henchman.serve_forever()
     except KeyboardInterrupt, e:
-        print "\nShutting down..."
+        print colored("\nShutting down...", 'red')
         henchman.kill()
         print "Bye!"

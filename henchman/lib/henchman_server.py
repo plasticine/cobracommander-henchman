@@ -24,4 +24,4 @@ class HenchmanServer(wsgi.WSGIWebsocketBase):
             '/static': os.path.join(os.path.dirname(__file__), '../static')
         })
         return SocketIOServer((address, port), app, resource="socket.io",
-            policy_server=False)
+            policy_server=False, log=None)
