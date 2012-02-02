@@ -12,7 +12,7 @@ setup_environment()
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 
-from henchman.lib.server import Server, run
+from henchman.henchman import Henchman
 from henchman.views.socketio import SocketIOHandler
 
 interactive = True
@@ -31,17 +31,16 @@ def before_feature(context, feature):
         # we need to wrap the serve_forever call in another process here to ensure
         # that it does not block the test execution yet is available to serve
         # testing requests.
-        _server = Server()
-        context.server = run(_server.application, 'localhost', 9999)
+        context.henchman = Henchman()
+        context.server = context.henchman.run('localhost', 9999)
         context.process = Process(target=context.server.serve_forever)
         context.process.start()
         # create the werkzeug client wrapper
-        context.client = Client(_server.application, BaseResponse)
+        context.client = Client(context.henchman.application, BaseResponse)
 
 def after_feature(context, feature):
     if 'browser' in feature.tags:
         # kill the server and shut down
-        context.server.kill()
         context.process.terminate()
 
 def before_scenario(context, scenario):

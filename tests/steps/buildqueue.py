@@ -1,5 +1,6 @@
 from behave import *
 import requests
+from mock import Mock
 from cobracommander.apps.build.models import Build, Target
 from cobracommander.apps.project.models import Project
 
@@ -12,7 +13,7 @@ def step(context, name):
 
 @given(u'that we have an empty build queue')
 def step(context):
-    pass
+    context.henchman.buildqueue._queue = []
 
 @given(u'a build exists with id "{id}"')
 def step(context, id):
@@ -26,11 +27,17 @@ def step(context, id):
 
 @when(u'a POST to add a new build is made with a build id value of "{id}"')
 def step(context, id):
-    data = {'id':id}
-    context.post_response = context.client.post('/builds/new', data=data)
+    context.henchman.buildqueue.append = Mock()
+    context.post_response = context.client.post('/builds/new', data={'id':id})
 
-@then(u'the build id is appended to the queue.')
+@when(u'a POST to add a new build is made with no build id')
 def step(context):
-    assert context.post_response.status_code == 200
-    context.client.get('/')
-    assert False
+    context.post_response = context.client.post('/builds/new', data={})
+
+@then(u'the response status is "{status_code}"')
+def step(context, status_code):
+    assert context.post_response.status_code == int(status_code)
+
+@then(u'the build id "{id}" is appended to the queue.')
+def step(context, id):
+    context.henchman.buildqueue.append.assert_called_with(id=id)
