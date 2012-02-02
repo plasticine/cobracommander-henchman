@@ -4,7 +4,7 @@ from django_socketio.views import CLIENTS
 
 def root(server, request):
     return server.render('index.html', **{
-      'queue':    server.queue,
+      'queue':    server.buildqueue,
       'clents':   CLIENTS,
       'channels': CHANNELS
     })

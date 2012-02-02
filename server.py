@@ -6,7 +6,7 @@ from optparse import OptionParser
 from henchman import __version__, setup_environment
 setup_environment()
 
-from henchman.lib.server import Server, run
+from henchman.henchman import Henchman
 
 if __name__ == '__main__':
     parser = OptionParser(version="%s" % (__version__))
@@ -22,12 +22,11 @@ if __name__ == '__main__':
 |___|___||_____||__|__||____||__|__||__|__|__||___._||__|__|
 
 Henchman is on patrol at http://%s:%s""" % (options.address, options.port)
-        server = Server()
-        _henchman = run(server.application, options.address, options.port)
-        _henchman.serve_forever()
+        henchman = Henchman().run(options.address, options.port)
         print '-'*61
         print
+        henchman.serve_forever()
     except KeyboardInterrupt, e:
         print "\nShutting down..."
-        _henchman.kill()
+        henchman.kill()
         print "Bye!"

@@ -8,7 +8,6 @@ def new(server, request):
     """
     if request.method == 'POST':
         build_id = request.form['id']
-        server.queue.append(id=build_id)
-        logger.info('New build with id:%s added to BuildQueue', build_id)
-        return Response('OK')
+        server.buildqueue.append(id=build_id)
+        return Response('Build id=%s appended tobuildqueue.' % build_id)
     return Response(status=400)

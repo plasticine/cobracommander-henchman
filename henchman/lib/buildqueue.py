@@ -4,7 +4,7 @@ from django_socketio import events, broadcast_channel
 from django.utils import simplejson as json
 from .json_encoder import ModelJSONEncoder
 
-from ..minion import Minion
+from .minion import Minion
 
 class BuildQueue(object):
   """
