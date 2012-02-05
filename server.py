@@ -13,7 +13,6 @@ if __name__ == '__main__':
     parser = OptionParser(version="%s" % (__version__))
     parser.add_option("-a", "--address", dest="address", help="hostname", default="localhost")
     parser.add_option("-p", "--port", dest="port", help="port", type="int", default=9000)
-    parser.add_option("-d", "--debug", action="store_true", dest="debug", help="enable debugging", default=False)
     (options, args) = parser.parse_args()
 
     try:
