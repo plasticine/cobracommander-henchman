@@ -20,5 +20,3 @@ Feature: new builds can be added to the build queue
     Given that we have an empty build queue
     When a POST to add a new build is made with no build id
     Then the response status is "400"
-
-
