@@ -53,7 +53,7 @@ class BuildQueue(object):
       # filter queue for only items that are waiting to execute.
       if len(self._queue) and len(filter(lambda x: not x.is_waiting, self._queue)) < 1:
         self._queue[0].start()
-      gevent.sleep(0.5)
+      gevent.sleep(1)
 
   def _on_subscribe(self, request, socket, context, message):
     """
