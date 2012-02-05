@@ -18,7 +18,7 @@ class BuildQueue(object):
   def __init__(self):
     self._queue = []
     self.current_item = 0
-    gevent.spawn(self.monitor_queue)
+    gevent.spawn(self._monitor)
     events.on_subscribe(channel='build_queue', handler=self._on_subscribe)
 
   def __len__(self):
@@ -45,7 +45,7 @@ class BuildQueue(object):
     data = json.dumps(self._queue, cls=ModelJSONEncoder)
     broadcast_channel(data, 'build_queue')
 
-  def monitor_queue(self):
+  def _monitor(self):
     """
     Poll `_queue` to see if we need to start a new Minion.
     """
