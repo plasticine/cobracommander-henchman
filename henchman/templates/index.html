@@ -34,7 +34,7 @@
           </ul>
       </li>
       <li>
-        <strong>Queue Length:</strong> {{ queue|length }}
+        <strong>queue length:</strong> {{ queue|length }}
         <ul>
           {% for minion in queue %}
             <li>{{ minion }}</li>
@@ -42,7 +42,6 @@
         </ul>
       </li>
     </ul>
-    <!--
     <script type="text/javascript">
       $(function(){
         var socket = new io.Socket('localhost', {
@@ -62,6 +61,5 @@
         console.log(socket);
       });
     </script>
-    -->
   </body>
 </html>

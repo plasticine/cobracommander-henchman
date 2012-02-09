@@ -10,9 +10,6 @@ from django_socketio.views import CLIENTS
 from ..lib import logger
 
 class SocketIOHandler(object):
-    """
-
-    """
     def __init__(self):
         self.logger = logger.get_logger(__name__)
 
@@ -29,6 +26,8 @@ class SocketIOHandler(object):
         context = {}
         socket = SocketIOChannelProxy(request.environ["socketio"])
         CLIENTS[socket.session.session_id] = (request, socket, context)
+
+        server.logger.debug('test')
 
         try:
             if socket.on_connect():
