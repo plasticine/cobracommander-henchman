@@ -1,3 +1,4 @@
+@db
 @browser
 Feature: new builds can be added to the build queue
 
