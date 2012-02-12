@@ -1,5 +1,6 @@
 from gevent.monkey import patch_all; patch_all()
 import gevent
+import os
 from multiprocessing import Process
 
 from django import db
@@ -7,7 +8,7 @@ from django.conf import settings
 from django.test.utils import setup_test_environment, teardown_test_environment
 from django.core.management import call_command
 
-from henchman import setup_environment
+from henchman import setup_test_environment
 setup_environment()
 
 from werkzeug.test import Client
@@ -20,6 +21,7 @@ old_name = settings.DATABASES['default']['NAME']
 
 def before_all(context):
     setup_test_environment()
+    context._fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 def after_all(context):
     # clean up django test DB
