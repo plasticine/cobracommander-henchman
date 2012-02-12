@@ -60,7 +60,7 @@ def after_feature(context, feature):
         # truncate the database between each feature
         call_command(
             'flush',
-            verbosity=1,
+            verbosity=0,
             interactive=False,
             database=db.connection.alias
         )
