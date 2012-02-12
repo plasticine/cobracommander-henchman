@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test.utils import setup_test_environment, teardown_test_environment
 from django.core.management import call_command
 
-from henchman import setup_test_environment
+from henchman import setup_environment
 setup_environment()
 
 from werkzeug.test import Client
@@ -21,7 +21,9 @@ old_name = settings.DATABASES['default']['NAME']
 
 def before_all(context):
     setup_test_environment()
-    context._fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
+    context.fixture_path = lambda * x: os.path.abspath(
+        os.path.join(os.path.dirname(__file__), 'fixtures', *x)
+    )
 
 def after_all(context):
     # clean up django test DB
