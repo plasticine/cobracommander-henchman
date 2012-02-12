@@ -23,8 +23,11 @@ def before_all(context):
 
 def after_all(context):
     # clean up django test DB
-    db.close_connection()
-    db.connection.creation.destroy_test_db(old_name, verbosity=0)
+    try:
+        db.close_connection()
+        db.connection.creation.destroy_test_db(old_name, verbosity=0)
+    except Exception, e:
+        pass
     teardown_test_environment()
 
 def before_feature(context, feature):
