@@ -1,19 +1,20 @@
 import gevent
 import os
-from django_socketio import events, broadcast_channel, NoSocket
+from django_socketio import events, NoSocket
 from django.conf import settings
 
 from cobracommander.apps.build.models import Build
 
 from django.utils import simplejson as json
 from henchman.lib.json_encoder import ModelJSONEncoder
+from henchman.lib.socketio_utils import broadcast_channel
 from .lib.git_wrapper import GitWrapper
 from .lib.snakefile import Snakefile
 
-WAITING     = 0
-ACTIVE      = 1
-STOPPED     = 2
-INACTIVE    = 3
+WAITING     = 0 # waiting to be executed
+ACTIVE      = 1 # currently executing
+STOPPED     = 2 # stopped for some reason, paused?
+COMPLETE    = 3 # complete, we dont care if it passed or failed as long as it is done
 
 class Minion(object):
   """
@@ -37,8 +38,12 @@ class Minion(object):
     return self._status == WAITING
 
   @property
+  def is_complete(self):
+    return self._status == COMPLETE
+
+  @property
   def status(self):
-    return('waiting', 'active', 'stopped', 'inactive',)[self._status]
+    return('waiting', 'active', 'stopped', 'complete',)[self._status]
 
   def start(self):
     """
@@ -57,37 +62,40 @@ class Minion(object):
 
   def _run(self):
     self._broadcast('git')
-    self.git_wrapper = GitWrapper(build=self.build, local_path=self.local_path)
+    self._update_repo()
 
     self._broadcast('snakefile')
-    self.snakefile = Snakefile(local_path=self.local_path)
-
-    print self.snakefile.snakefile
+    self._read_snakefile()
 
     self._broadcast('build')
+    self._execute_steps()
+
+    self._broadcast('cleanup')
+    self._cleanup()
+
+  def _update_repo(self):
+    self.git_wrapper = GitWrapper(build=self.build, local_path=self.local_path)
+
+  def _read_snakefile(self):
+    self.snakefile = Snakefile(local_path=self.local_path)
+
+  def _execute_steps(self):
     for step in self.snakefile['build']:
       step.execute()
       while step.process.poll() is None:
         self._broadcast(step.process.stdout.readline())
 
-    self._broadcast('cleanup')
-    self.cleanup()
+  def _cleanup(self):
+    self._status = COMPLETE
+    self.greenlet.join()
 
   def stop(self):
     self.greenlet.kill()
-    self._status = STOPPED
-
-  def cleanup(self):
-    self._status = STOPPED
-    self.greenlet.join()
+    self._status = COMPLETE
 
   def _broadcast(self, data):
     data = json.dumps(data, cls=ModelJSONEncoder)
     self._log.append(data)
-    try:
-      broadcast_channel(data, self.channel)
-    except NoSocket, e:
-      print e
 
   def _on_subscribe(self, request, socket, context, message):
     """
