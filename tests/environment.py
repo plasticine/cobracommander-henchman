@@ -35,6 +35,7 @@ def after_all(context):
     teardown_test_environment()
 
 def before_feature(context, feature):
+    context.henchman = Henchman()
     if 'db' in feature.tags:
         # set up django database
         db.connection.creation.create_test_db(
@@ -48,7 +49,6 @@ def before_feature(context, feature):
         # we need to wrap the serve_forever call in another process here to ensure
         # that it does not block the test execution yet is available to serve
         # testing requests.
-        context.henchman = Henchman()
         context.server = context.henchman.run('localhost', 9999)
         context.process = Process(target=context.server.serve_forever)
         context.process.start()

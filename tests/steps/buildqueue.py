@@ -11,10 +11,6 @@ def step(context, name):
     context.project.targets.add(context.target)
     context.project.save()
 
-@given(u'that we have an empty build queue')
-def step(context):
-    context.henchman.buildqueue._queue = []
-
 @given(u'a build exists with id "{id}"')
 def step(context, id):
     context.build = Build.objects.create(**{
