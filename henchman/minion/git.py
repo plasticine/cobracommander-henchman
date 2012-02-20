@@ -1,6 +1,7 @@
 from gevent import monkey; monkey.patch_all()
 from os import path
 import subprocess
+from pbs import git
 
 from django.conf import settings
 
@@ -19,37 +20,28 @@ class Git(object):
   build-target from the others.
   """
 
-  def __init__(self, build, cwd):
-    self.build = build
+  def __init__(self, cwd, refspec, remote_url):
     self.cwd = cwd
-    self.remote_url = self.build.project.url
-    self.refspec = "origin/%s" % self.build.target.refspec
-    self.stdout = subprocess.PIPE
-    self.stderr = subprocess.PIPE
-    self._update()
+    self.remote_url = remote_url
+    self.refspec = "origin/%s" % refspec
 
-  def _git(self, command, cwd=settings.BUILD_ROOT):
-    command = "`which git` %s" % command
-    return subprocess.Popen(command, cwd=cwd, shell=True,
-              stdout=self.stdout, stderr=self.stderr).communicate()
-
-  def _clone(self):
-    """
-    git clone repo path
-    git reset --hard refspec
-    """
-    self._git('clone %s %s' % (self.remote_url, self.cwd))
-
-  def _reset(self):
-    """
-    git reset --hard refspec
-    """
-    self._git('reset --hard %s' % (self.refspec), cwd=self.cwd)
-
-  def _update(self):
+  def update(self):
     if path.exists(self.cwd):
       self._reset()
     else:
       self._clone()
       self._reset()
     return
+
+  def _clone(self):
+    """
+    git clone repo path
+    git reset --hard refspec
+    """
+    git.clone(self.remote_url, self.cwd)
+
+  def _reset(self):
+    """
+    git reset --hard refspec
+    """
+    git.reset(self.refspec, hard=True)
