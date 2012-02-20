@@ -72,7 +72,7 @@ class BuildQueue(object):
     remove completed Minions from the build queue and prepend them to the
     complete queue for reference.
     """
-    completed = []
+    completed = self._completed
     complete = [i for i, x in enumerate(self._queue) if x.is_complete]
     [completed.insert(0, self._queue[x]) for x in complete]
     self._completed = completed[:5]
