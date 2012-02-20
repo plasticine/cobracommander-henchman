@@ -11,6 +11,7 @@ from .snakefile import Snakefile
 
 from ..utils.json_encoder import ModelJSONEncoder
 from ..utils.socketio import broadcast_channel
+from ..utils.logger import get_logger
 
 WAITING     = 0 # waiting to be executed
 ACTIVE      = 1 # currently executing
@@ -28,6 +29,7 @@ class Minion(object):
         self._log = list()
         self._status = WAITING
         self._steps = []
+        self._logger = get_logger(__name__)
 
     def __repr__(self):
         return "<%s build_id='%s' build_uuid='%s' status='%s'>" % ("Minion", self.build.id, self.build.uuid, self.status)
@@ -77,24 +79,33 @@ class Minion(object):
         return Build.objects.select_related().get(id=id)
 
     def _run(self):
-        self._update_repo()
-        self.snakefile = self._read_snakefile()
-        self._execute_steps()
-        self._save()
-        self._cleanup()
+        try:
+            self._update_repo()
+            self._read_snakefile()
+            self._execute_steps()
+            self._save()
+            self._cleanup()
+        except Exception, e:
+            self._cleanup()
+            raise e
 
     def _update_repo(self):
-        Git(self.cwd)
+        self._logger.info('updating repo')
+        Git(cwd = self.cwd, refspec = self.build.target.refspec,
+            remote_url = self.build.project.url)
 
     def _read_snakefile(self):
-        return Snakefile(self.cwd)
+        self._logger.info('read snakefile')
+        self.snakefile = Snakefile(self.cwd).load()
 
     def _execute_steps(self):
+        self._logger.info('execute build steps')
         for step in self.snakefile['build']:
             step.execute()
             self._steps.append(step)
 
     def _cleanup(self):
+        self._logger.info('perform port-execution clean up')
         self._status = COMPLETE
         self.greenlet.join()
 
