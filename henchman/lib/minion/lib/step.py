@@ -1,7 +1,7 @@
 import subprocess
 
-PASSED = 0
-FAILED = not 0
+PASSED = lambda x: x == 0
+FAILED = lambda x: x != 0 or x > 0
 
 class Step(object):
   """
@@ -13,22 +13,20 @@ class Step(object):
     self.command = command
     self._stdout = subprocess.PIPE
     self._stderr = subprocess.PIPE
-    self._process = None
-    self._returncode = None
 
   @property
   def passed(self):
-    return PASSED == self._returncode
+    return PASSED(self.returncode())
 
   @property
   def failed(self):
-    return FAILED == self._returncode
+    return FAILED(self.returncode())
 
   def returncode(self):
     return self._returncode
 
   def execute(self):
-    self.process = subprocess.Popen(
+    self._process = subprocess.Popen(
       self.command,
       cwd     = self.local_path,
       shell   = True,

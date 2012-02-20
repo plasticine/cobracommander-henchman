@@ -22,11 +22,12 @@ class Minion(object):
   """
 
   def __init__(self, id):
-    self._status = WAITING
     self.build = self._get_build(id)
     self.local_path = os.path.join(settings.BUILD_ROOT, self.build.uuid)
     self.channel = "build_%s_console" % self.build.uuid
     self._log = list()
+    self._status = WAITING
+    self._steps = []
     events.on_subscribe(channel=self.channel, handler=self._on_subscribe)
 
   def __repr__(self):
@@ -44,6 +45,12 @@ class Minion(object):
   @property
   def status(self):
     return('waiting', 'active', 'stopped', 'complete',)[self._status]
+
+  @property
+  def passed(self):
+    if self.is_complete:
+      return not False in [x.passed for x in self._steps]
+    return None
 
   def start(self):
     """
@@ -86,8 +93,8 @@ class Minion(object):
   def _execute_steps(self):
     for step in self.snakefile['build']:
       step.execute()
-      while step.process.poll() is None:
-        self._broadcast(step.process.stdout.readline())
+      while step._process.poll() is None:
+        self._broadcast(step._process._stdout.readline())
       self._steps.append(step)
 
   def _cleanup(self):

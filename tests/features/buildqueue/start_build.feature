@@ -1,4 +1,3 @@
-@wip
 @db
 Feature: a build is started when there are no builds in progress
 
