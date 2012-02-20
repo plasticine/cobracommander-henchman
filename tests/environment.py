@@ -21,6 +21,7 @@ old_name = settings.DATABASES['default']['NAME']
 
 def before_all(context):
     setup_test_environment()
+    context._test_db_exists = False
     context.fixture_path = lambda * x: os.path.abspath(
         os.path.join(os.path.dirname(__file__), 'fixtures', *x)
     )
@@ -36,13 +37,18 @@ def after_all(context):
 
 def before_feature(context, feature):
     context.henchman = Henchman()
+    # short monitor interval so we can speed up testing
+    context.henchman.buildqueue._monitor_sleep_time = 0.001
+
     if 'db' in feature.tags:
         # set up django database
-        db.connection.creation.create_test_db(
-            verbosity=0,
-            autoclobber=False
-        )
-        db.connection.enter_transaction_management()
+        if not context._test_db_exists:
+            db.connection.creation.create_test_db(
+                verbosity=0,
+                autoclobber=False
+            )
+            db.connection.enter_transaction_management()
+            context._test_db_exists = True
 
     if 'browser' in feature.tags:
         # run the Henchman server
