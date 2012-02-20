@@ -24,9 +24,9 @@ if __name__ == '__main__':
 |___|___||_____||__|__||____||__|__||__|__|__||___._||__|__|
 
 Henchman v%s is on patrol at http://%s:%s""" % (__version__, options.address, options.port), 'blue')
-        henchman = Henchman().run(options.address, options.port)
         print colored('-'*60, 'blue')
         print
+        henchman = Henchman().run(options.address, options.port)
         henchman.serve_forever()
     except KeyboardInterrupt, e:
         print colored("\nShutting down...", 'red')
