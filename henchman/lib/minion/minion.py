@@ -23,7 +23,7 @@ class Minion(object):
 
   def __init__(self, id):
     self._status = WAITING
-    self.build = Build.objects.select_related().get(id=id)
+    self.build = self._get_build(id)
     self.local_path = os.path.join(settings.BUILD_ROOT, self.build.uuid)
     self.channel = "build_%s_console" % self.build.uuid
     self._log = list()
@@ -57,15 +57,19 @@ class Minion(object):
     - Save necessary things to DB.
     """
     self._status = ACTIVE
+    self._steps = []
     self.greenlet = gevent.Greenlet(self._run)
     self.greenlet.start()
+
+  def _get_build(self, id):
+    return Build.objects.select_related().get(id=id)
 
   def _run(self):
     self._broadcast('git')
     self._update_repo()
 
     self._broadcast('snakefile')
-    self._read_snakefile()
+    self.snakefile = self._read_snakefile()
 
     self._broadcast('build')
     self._execute_steps()
@@ -74,16 +78,17 @@ class Minion(object):
     self._cleanup()
 
   def _update_repo(self):
-    self.git_wrapper = GitWrapper(build=self.build, local_path=self.local_path)
+    GitWrapper(build=self.build, local_path=self.local_path)
 
   def _read_snakefile(self):
-    self.snakefile = Snakefile(local_path=self.local_path)
+    return Snakefile(local_path=self.local_path)
 
   def _execute_steps(self):
     for step in self.snakefile['build']:
       step.execute()
       while step.process.poll() is None:
         self._broadcast(step.process.stdout.readline())
+      self._steps.append(step)
 
   def _cleanup(self):
     self._status = COMPLETE
