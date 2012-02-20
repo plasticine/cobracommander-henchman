@@ -3,9 +3,9 @@ import json
 
 from django_socketio import events
 from django.utils import simplejson as json
-from .json_encoder import ModelJSONEncoder
-from .socketio_utils import broadcast_channel
 
+from .utils.json_encoder import ModelJSONEncoder
+from .utils.socketio import broadcast_channel
 from .minion import Minion
 
 class BuildQueue(object):

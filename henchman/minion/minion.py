@@ -1,15 +1,16 @@
 import gevent
 import os
-from django_socketio import events, NoSocket
+from django_socketio import events
 from django.conf import settings
+from django.utils import simplejson as json
 
 from cobracommander.apps.build.models import Build
 
-from django.utils import simplejson as json
-from henchman.lib.json_encoder import ModelJSONEncoder
-from henchman.lib.socketio_utils import broadcast_channel
-from .lib.git_wrapper import GitWrapper
-from .lib.snakefile import Snakefile
+from .git import Git
+from .snakefile import Snakefile
+
+from ..utils.json_encoder import ModelJSONEncoder
+from ..utils.socketio import broadcast_channel
 
 WAITING     = 0 # waiting to be executed
 ACTIVE      = 1 # currently executing
@@ -83,10 +84,10 @@ class Minion(object):
         self._cleanup()
 
     def _update_repo(self):
-        GitWrapper(build=self.build, cwd=self.cwd)
+        Git(self.cwd)
 
     def _read_snakefile(self):
-        return Snakefile(cwd=self.cwd)
+        return Snakefile(self.cwd)
 
     def _execute_steps(self):
         for step in self.snakefile['build']:

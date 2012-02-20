@@ -1,9 +1,8 @@
 from mock import Mock
 from nose.tools import eq_, ok_, assert_raises
 
-from henchman.lib.minion.minion import Minion
-from henchman.lib.minion.minion import COMPLETE
-from henchman.lib.minion.lib.step import Step
+from henchman.minion import Minion, COMPLETE
+from henchman.minion.step import Step
 
 @given(u'that we have a build with "{num_steps}" steps')
 def step(context, num_steps):

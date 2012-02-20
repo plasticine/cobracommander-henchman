@@ -1,6 +1,3 @@
-from henchman.lib.minion.lib.snakefile import Snakefile, \
-SnakeFileValidationError, SnakeFileJSONError, SnakeFileNotExecutionError
-
 class Struct:
     def __init__(self, **entries):
         self.__dict__.update(entries)

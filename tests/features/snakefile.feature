@@ -9,7 +9,7 @@ Feature: builds are defined by a file (snakefile) in the project codebase
     Given that we have a valid Snakefile
     And the Snakefile is not executable
     When the Snakefile is loaded
-    Then a SnakeFileNotExecutionError exception is raised
+    Then a SnakeFileExecutionError exception is raised
 
   Scenario: Snakefile is malformed and cannot be parsed as JSON
     Given that we have a malformed Snakefile

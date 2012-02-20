@@ -4,7 +4,7 @@ import subprocess
 
 from django.conf import settings
 
-class GitWrapper(object):
+class Git(object):
   """
   Handle cloning a project remote repo.
 

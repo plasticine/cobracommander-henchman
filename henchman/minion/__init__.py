@@ -1,1 +1,1 @@
-from minion import Minion
+from minion import Minion, WAITING, ACTIVE, STOPPED, COMPLETE

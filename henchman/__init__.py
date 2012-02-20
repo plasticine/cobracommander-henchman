@@ -1,5 +1,8 @@
 __version__ = "0.1"
 
+class DjangoSettingModuleSettingFail(Exception):
+   pass
+
 def setup_environment():
   """
   Set up Henchman to talk to Cobracommander django app by fucking with paths and
@@ -14,4 +17,4 @@ def setup_environment():
     __import__(name)
     setup_environ(sys.modules[name])
   else:
-    raise
+    raise DjangoSettingModuleSettingFail()
