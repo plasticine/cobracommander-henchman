@@ -44,9 +44,7 @@
     </ul>
     <script type="text/javascript">
       $(function(){
-        var socket = new io.Socket('localhost', {
-          'port':9000
-        });
+        var socket = new io.Socket();
         socket.on('connect', function() {
           console.log('socket:connected');
           socket.subscribe('__debug__');
