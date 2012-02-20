@@ -8,11 +8,9 @@ class Step(object):
   A Step represents in individual command or task that makes up a build.
   """
 
-  def __init__(self, local_path, command):
-    self.local_path = local_path
+  def __init__(self, cwd, command):
+    self.cwd = cwd
     self.command = command
-    self._stdout = subprocess.PIPE
-    self._stderr = subprocess.PIPE
 
   @property
   def passed(self):
@@ -28,10 +26,11 @@ class Step(object):
   def execute(self):
     self._process = subprocess.Popen(
       self.command,
-      cwd     = self.local_path,
+      cwd     = self.cwd,
       shell   = True,
-      stdout  = self._stdout,
-      stderr  = self._stderr
+      stdout  = subprocess.PIPE,
+      stdin   = subprocess.PIPE
     )
+    self._stdout, self._stderr = self._process.communicate(None)
     self._returncode = self._process.returncode
 

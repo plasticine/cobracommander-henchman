@@ -6,6 +6,3 @@ class Henchman(henchman_server.HenchmanServer):
         self.logger = logger.get_logger(__name__)
         self.buildqueue = buildqueue.BuildQueue()
         super(Henchman, self).__init__()
-
-
-

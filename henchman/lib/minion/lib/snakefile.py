@@ -1,5 +1,5 @@
 from django.conf import settings
-from os import path, chmod
+import os
 import subprocess
 import json
 
@@ -27,9 +27,11 @@ class Snakefile(object):
    - validate that the output of the snakefile is valid and meets all requirements
    """
 
-   def __init__(self, path):
-      self.path = path
-      self._stderr = stderr=subprocess.PIPE
+   def __init__(self, cwd):
+      self.cwd = cwd
+      self.snakefile_path = os.path.join(self.cwd, 'snakefile')
+      self._stderr = subprocess.PIPE
+      self.load()
 
    def __getitem__(self, key):
       return self._snakefile[key]
@@ -42,15 +44,15 @@ class Snakefile(object):
       self._execute()
       self._load_json()
       self._validate()
-      # self._wrap_build_steps()
+      self._wrap_build_steps()
 
    def _set_permissions(self):
-      chmod(self.path, 0777)
+      os.chmod(self.snakefile_path, 0777)
 
    def _execute(self):
       try:
          self._snakefile_output = subprocess.check_output(
-            self.path,
+            self.snakefile_path,
             shell=True,
             stderr=self._stderr
          )
@@ -71,4 +73,4 @@ class Snakefile(object):
          raise SnakeFileValidationError(e)
 
    def _wrap_build_steps(self):
-      self._snakefile['build'] = map(lambda x: Step(command=x), self._snakefile['build'])
+      self._snakefile['build'] = map(lambda x: Step(cwd=self.cwd, command=x), self._snakefile['build'])

@@ -41,6 +41,21 @@
           {% endfor %}
         </ul>
       </li>
+      <li>
+        <strong>completed length:</strong> {{ queue._completed|length }}
+        <ul>
+          {% for minion in queue._completed %}
+            <li>
+              {{ minion }}
+              <ul>
+                {% for step in minion._steps %}
+                  <li><code>{{ step.command }}</code> - {{ step.passed }}</li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
     </ul>
     <script type="text/javascript">
       $(function(){
