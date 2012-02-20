@@ -7,6 +7,6 @@ class Henchman(HenchmanServer):
 
     """
     def __init__(self):
+        super(Henchman, self).__init__()
         self.logger = get_logger(__name__)
         self.buildqueue = BuildQueue()
-        super(Henchman, self).__init__()
