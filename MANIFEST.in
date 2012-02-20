@@ -1,0 +1,8 @@
+include README
+include snakefile
+include setup.py
+include server.py
+include requirements.pip
+recursive-include henchman *.py *.js *.html
+recursive-include tests *.py *.feature
+recursive-include tests/fixtures *.*
