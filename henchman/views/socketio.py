@@ -8,11 +8,7 @@ from django_socketio.channels import SocketIOChannelProxy
 from django_socketio.clients import client_start, client_end
 from django_socketio.clients import CLIENTS
 
-from ..lib import logger
-
 class SocketIOHandler(object):
-    def __init__(self):
-        self.logger = logger.get_logger(__name__)
 
     @staticmethod
     def cleanup():

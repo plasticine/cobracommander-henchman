@@ -7,10 +7,10 @@ from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.wsgi import SharedDataMiddleware
 from socketio import SocketIOServer
 
-import wsgi
-from ..urls import urls
+from .utils.wsgi import WSGIWebsocketBase
+from .urls import urls
 
-class HenchmanServer(wsgi.WSGIWebsocketBase):
+class HenchmanServer(WSGIWebsocketBase):
     """
     HenchmanServer runs a WSGI server and listens for connections over websockets.
     """
@@ -20,7 +20,8 @@ class HenchmanServer(wsgi.WSGIWebsocketBase):
 
     def run(self, address, port=9000):
         app = SharedDataMiddleware(self.application, {
-            '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__), '../static/javascripts/socket.io.js'),
+            '/socket.io/socket.io.js': os.path.join(os.path.dirname(__file__),
+                '../static/javascripts/socket.io.js'),
             '/static': os.path.join(os.path.dirname(__file__), '../static')
         })
         return SocketIOServer((address, port), app, resource="socket.io",

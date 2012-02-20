@@ -1,8 +1,8 @@
 from mock import Mock
 from nose.tools import eq_, ok_, assert_raises
 
-from henchman.lib.minion.lib.step import Step
-from henchman.lib.minion.minion import COMPLETE, ACTIVE
+from henchman.minion.step import Step
+from henchman.minion import COMPLETE, ACTIVE
 
 def mock_steps(context, returncode_value):
     Step.returncode = Mock(return_value=returncode_value)

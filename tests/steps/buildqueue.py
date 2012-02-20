@@ -5,7 +5,7 @@ from nose.tools import eq_, ok_, assert_raises
 
 from cobracommander.apps.build.models import Build, Target
 from cobracommander.apps.project.models import Project
-from henchman.lib.minion.minion import WAITING, ACTIVE, STOPPED, COMPLETE
+from henchman.minion import WAITING, ACTIVE, STOPPED, COMPLETE
 
 @given(u'that a project called "{name}" exists')
 def step(context, name):
