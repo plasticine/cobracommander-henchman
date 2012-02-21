@@ -72,6 +72,7 @@ class Minion(object):
         self._status = COMPLETE
 
     def _save(self):
+        self._logger.info('persisting build data')
         for step in self._steps:
             print step
 
@@ -99,14 +100,19 @@ class Minion(object):
         self.snakefile = Snakefile(self.cwd).load()
 
     def _execute_steps(self):
-        self._logger.info('execute build steps')
+        self._logger.info('executing %s build steps', len(self.snakefile['build']))
         for step in self.snakefile['build']:
-            step.execute()
-            self._steps.append(step)
+            self._execute_step(step)
+
+    def _execute_step(self, step):
+        self._logger.info('executing step')
+        step.execute()
+        self._steps.append(step)
 
     def _cleanup(self):
-        self._logger.info('perform port-execution clean up')
+        self._logger.info('perform post-execution clean up')
         self._status = COMPLETE
         self.greenlet.join()
+        print self.greenlet
 
 
