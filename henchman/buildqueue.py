@@ -1,12 +1,8 @@
 import gevent
 import json
 
-from django_socketio import events
-from django.utils import simplejson as json
-
-from .utils.json_encoder import ModelJSONEncoder
-from .utils.socketio import broadcast_channel
 from .minion import Minion
+from .utils.logger import get_logger
 
 class BuildQueue(object):
   """
@@ -21,9 +17,11 @@ class BuildQueue(object):
     self._queue = []
     self._completed = []
     self._monitor_sleep_time = 1
+    self._monitor_hibernate_time = 5
     self._current_item = 0
+    self._logger = get_logger(__name__)
+    self._logger.info('Monitoring queue for incoming builds')
     gevent.spawn(self._monitor)
-    events.on_subscribe(channel='build_queue', handler=self._on_subscribe)
 
   def __len__(self):
     return len(self._queue)
@@ -49,8 +47,7 @@ class BuildQueue(object):
     queue list.
     """
     self._queue.append(self._wrap_minion(id))
-    data = json.dumps(self._queue, cls=ModelJSONEncoder)
-    broadcast_channel(data, 'build_queue')
+    self._logger.info('Appended new build to queue with id:%s, queue length is now %s', id, len(self._queue))
 
   def _wrap_minion(self, id):
     return Minion(id=id)
@@ -63,24 +60,25 @@ class BuildQueue(object):
       # filter queue for only items that are waiting to execute.
       if len(self._queue):
         if len(filter(lambda x: not x.is_waiting, self._queue)) < 1:
-          self._queue[0].start()
+          minion = self._queue[0]
+          self._logger.info('Putting minion to work')
+          minion.start()
         self._clean_queue()
+        self._hibernate()
       gevent.sleep(self._monitor_sleep_time)
+
+  def _hibernate(self):
+    self._logger.info('Hibernating for %s seconds', self._monitor_hibernate_time)
+    gevent.sleep(self._monitor_hibernate_time)
 
   def _clean_queue(self):
     """
     remove completed Minions from the build queue and prepend them to the
     complete queue for reference.
     """
+    self._logger.info('Cleaning internal build queue')
     completed = self._completed
     complete = [i for i, x in enumerate(self._queue) if x.is_complete]
     [completed.insert(0, self._queue[x]) for x in complete]
     self._completed = completed[:5]
     self._queue[:] = [x for x in self._queue if not x.is_complete]
-
-  def _on_subscribe(self, request, socket, context, message):
-    """
-    New clients should recieve the buffer of all full queue.
-    """
-    data = json.dumps(self._queue, cls=ModelJSONEncoder)
-    socket.send(data)
