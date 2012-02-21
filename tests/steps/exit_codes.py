@@ -8,10 +8,11 @@ def mock_steps(context, returncode_value):
     Step.returncode = Mock(return_value=returncode_value)
     Step._process = Mock()
     Step.execute = Mock()
+    context.minion._read_snakefile = Mock()
 
     num_steps = len(context.minion._read_snakefile.return_value['build'])
     steps = [Step('','') for x in range(num_steps)]
-    context.minion._read_snakefile = Mock(return_value={'build':steps})
+    context.minion.snakefile = {'build':steps}
 
 @given(u'all the of the steps have zero return codes')
 def step(context):

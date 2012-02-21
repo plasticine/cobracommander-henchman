@@ -10,9 +10,10 @@ def step(context, num_steps):
     Minion._get_build = Mock(return_value=Struct(**{
         'id':1, 'uuid':'roflcopter'
     }))
-    Minion._read_snakefile = Mock(return_value={
+    Minion._read_snakefile = Mock()
+    Minion.snakefile = {
         'build':[Mock(name="step_%s" % x) for x in range(int(num_steps))]
-    })
+    }
     context.minion = Minion(id=999)
 
 @when(u'the minion has completed the build')
